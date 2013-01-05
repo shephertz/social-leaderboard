@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"        
+    android:orientation="horizontal"
+    android:padding="5dip">
+    
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textColor="#FFFFFF"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:layout_weight="1" />
+    <TextView
+        android:id="@+id/score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_weight="1" />  
+    <ImageView
+	    android:id="@+id/profile_pic"                              
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content" 
+	    android:layout_weight="1"
+	    android:layout_gravity="right"  
+	    android:src="@drawable/default_profile" />         
+</LinearLayout>

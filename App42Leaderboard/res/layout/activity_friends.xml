@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:orientation="vertical"
+    android:background="@drawable/game_background"
+    android:layout_height="fill_parent">
+     
+     <TextView
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:maxLines="1"
+         android:gravity="center"
+         android:text="Friends Activity Feed"
+         android:textColor="#FFFFFF"
+         android:drawableBottom="@drawable/horizontal_splitter"
+         android:textSize="25sp"
+         android:textStyle="bold" /> 
+	            
+     <TextView
+         android:id="@+id/notification_msg"
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:maxLines="1"
+         android:gravity="center"        
+         android:textColor="#FFFFFF"
+         android:textSize="25sp"
+         android:textStyle="bold" />
+          
+    <ListView
+		    android:id="@id/android:list"    
+		    android:layout_width="fill_parent"
+		    android:layout_height="0dp"
+		    android:layout_marginTop="5dp"
+		    android:layout_marginBottom="7dp"
+		    android:divider="@null"
+		    android:dividerHeight="7dp"
+	        android:minHeight="100dp"		
+	        android:layout_weight="1"   
+	        android:gravity="center_horizontal" 		    	        
+		    android:listSelector="@android:color/transparent"
+		    android:cacheColorHint="@android:color/transparent" />   
+</LinearLayout>

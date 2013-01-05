@@ -1,0 +1,90 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:background="@drawable/game_background"
+    android:orientation="vertical" >
+
+    <LinearLayout 
+        android:id="@+id/pre_fb_layout"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent" 
+	    android:gravity="center"
+	    android:orientation="vertical" >
+	    
+        <ImageView 
+	        android:src="@drawable/app42_leaderboard_icon"
+	        android:layout_height="60dp"
+	        android:layout_width="fill_parent" 
+	        android:layout_marginBottom="20dp"
+	        />       
+ 	    <ImageButton
+	        android:onClick="onFacebookConnectClicked" 
+	        android:src="@drawable/f_connect"
+	        android:layout_height="50dp"
+	        android:layout_width="wrap_content"
+	        android:layout_marginBottom="20dp"	        
+	        />       
+
+	     <TextView
+	         android:layout_width="match_parent"
+	         android:layout_height="wrap_content"
+	         android:textColor="#FFFFFF"
+	         android:text="Sign-in to see leader-boards "
+	         android:gravity="center_horizontal"
+	         android:textSize="20sp" />
+	     <TextView
+	         android:layout_width="match_parent"
+	         android:layout_height="wrap_content"
+	         android:textColor="#FFFFFF"
+	         android:text="and interact with friends"
+	         android:gravity="center_horizontal"
+	         android:textSize="20sp" />
+    </LinearLayout>
+    <LinearLayout 
+        android:id="@+id/post_fb_layout"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="vertical" >
+        
+	    <TextView
+	        android:id="@+id/header"
+	        android:layout_width="fill_parent"
+	        android:textSize="40dp"
+	        android:textColor="#FFFFFF"
+	        android:gravity="center_horizontal"
+	        android:layout_height="wrap_content"
+	        android:layout_marginBottom="20dp"
+	        tools:context=".LaunchActivity" />
+	
+	    <ImageView
+		    android:id="@+id/profile_pic"                              
+		    android:layout_width="fill_parent"
+		    android:gravity="center_horizontal"
+		    android:layout_height="100dp"   
+		    android:src="@drawable/default_profile" /> 
+		    
+	    <LinearLayout 
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content" 
+		    android:gravity="center"
+		    android:layout_marginTop="50dp">
+	        
+		    <Button
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:onClick="onSeeLeaderBoardsClicked"
+		        android:state_enabled="false"
+		        android:textSize="12dp"
+		        android:text="Leaderboards" /> 
+	   	    
+	   	    <Button
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:onClick="onFriendsClicked"
+		        android:state_enabled="false"
+		        android:textSize="12dp"
+		        android:text="Friends Feed" />
+	    </LinearLayout>
+	</LinearLayout>
+</LinearLayout>
