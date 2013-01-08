@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:background="@drawable/game_background"
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical">
+	<Button android:id="@+id/bNew"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:padding="5px"
+			android:text="@string/btn_newgame" />
+	<Button android:id="@+id/bExit"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:padding="5px"
+			android:text="@string/btn_exit" />
+	<ImageButton android:id="@+id/bApp42Leaderboard"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"	
+			android:onClick="onApp42LeaderboardClicked"		
+			android:src="@drawable/app42_leaderboard_icon" />	
+</LinearLayout>

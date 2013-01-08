@@ -38,6 +38,14 @@ public class FriendsActivityAdapter extends BaseAdapter implements FacebookFrien
 		notifyDataSetChanged();
 	}
 	
+	public String getFriendId(int position){
+		return feedList.get(position).optString("id");
+	}
+	
+	public String getFriendName(int position){
+		return feedList.get(position).optString("name");
+	}
+	
 	@Override
 	public int getCount() {
 		// TODO Auto-generated method stub
@@ -91,7 +99,7 @@ public class FriendsActivityAdapter extends BaseAdapter implements FacebookFrien
 		for(int i=0; i<gameFriends.size(); i++){
 			JSONObject friendObj = gameFriends.get(i);
 			String username = friendObj.optString("id");
-			String name = friendObj.optString("name");
+			String displayName = friendObj.optString("name");
 			
 			AsyncApp42Service.instance().getLastActivityOfUser(i, username, this);
 			
@@ -101,7 +109,8 @@ public class FriendsActivityAdapter extends BaseAdapter implements FacebookFrien
 	            JSONObject dataObj = picObj.getJSONObject("data");
 	            String picUrl = dataObj.getString("url");			
 				feedObj.put("picUrl", picUrl);
-				feedObj.put("name", name);
+				feedObj.put("name", displayName);
+				feedObj.put("id", username);
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

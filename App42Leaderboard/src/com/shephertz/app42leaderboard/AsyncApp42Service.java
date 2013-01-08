@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.os.Handler;
+
 import com.shephertz.app42.paas.sdk.android.App42NotFoundException;
 import com.shephertz.app42.paas.sdk.android.ServiceAPI;
 import com.shephertz.app42.paas.sdk.android.customcode.CustomCodeService;
@@ -16,6 +17,9 @@ import com.shephertz.app42.paas.sdk.android.game.Game;
 import com.shephertz.app42.paas.sdk.android.game.GameService;
 import com.shephertz.app42.paas.sdk.android.game.ScoreBoardService;
 import com.shephertz.app42.paas.sdk.android.game.Game.Score;
+import com.shephertz.app42.paas.sdk.android.message.Queue;
+import com.shephertz.app42.paas.sdk.android.message.QueueService;
+import com.shephertz.app42.paas.sdk.android.message.Queue.Message;
 import com.shephertz.app42.paas.sdk.android.storage.Query;
 import com.shephertz.app42.paas.sdk.android.storage.QueryBuilder;
 import com.shephertz.app42.paas.sdk.android.storage.QueryBuilder.Operator;
@@ -29,6 +33,7 @@ public class AsyncApp42Service {
 	private ScoreBoardService scoreBoardService = null;
 	private StorageService storageService = null;
 	private GameService gameService = null;
+	private QueueService queueService = null;
 	
 	private static AsyncApp42Service mInstance = null;
 	
@@ -48,6 +53,7 @@ public class AsyncApp42Service {
     	this.scoreBoardService = sp.buildScoreBoardService(); 	
     	this.storageService = sp.buildStorageService();
     	this.gameService = sp.buildGameService();
+    	this.queueService = sp.buildQueueService();
 	}	
 	
 	public void saveScore(final String name, final long score, final String gameName, final App42ResultHandler callBack){
@@ -90,6 +96,11 @@ public class AsyncApp42Service {
 		public void onGetTopRankingsInGroup(ArrayList<JSONObject> scoreDataList);
 	}
 
+	public static interface MessageQueueListener {
+		public void onSendNotification(int result);
+		public void onGetMessages(ArrayList<JSONObject> msgList);
+	}
+	
 	public void storeUserProfile() {
 		
 		new Thread(){
@@ -110,6 +121,7 @@ public class AsyncApp42Service {
 						userProfile.put("DisplayName", UserContext.MyDisplayName);
 						userProfile.put("PicUrl", UserContext.MyPicUrl);
 						storageService.insertJSONDocument(Constants.USER_DB_NAME, Constants.USER_PROFILE_COLLECTION, userProfile.toString());
+						queueService.createPullQueue("Inbox"+UserContext.MyUserName, "queue for received messages");
 					} catch (JSONException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -119,7 +131,85 @@ public class AsyncApp42Service {
 		}.start();
 	}
 	
-
+	private JSONObject buildProfile(String username, String displayName, String picUrl) throws JSONException{
+		
+		JSONObject object = new JSONObject();
+		object.put("id", username);
+		object.put("displayName", displayName);
+		object.put("picUrl", picUrl);
+		return object;
+	}
+	
+	public void sendNotification(final String toId, final String notify, final boolean isMessage, final MessageQueueListener callback){
+		final Handler callerThreadHandler = new Handler();
+		new Thread(){
+			@Override
+			public void run(){
+				try{
+					JSONObject messageObj = new JSONObject();
+					if(isMessage){
+					messageObj.put("message", notify);
+					}
+					else{
+						messageObj.put("challenge", notify);
+					}
+					messageObj.put("sender", buildProfile(UserContext.MyUserName, UserContext.MyDisplayName, UserContext.MyPicUrl));
+					queueService.sendMessage("Inbox"+toId, messageObj.toString(), -1);
+            		callerThreadHandler.post(new Runnable() {
+                        @Override
+                        public void run() {      
+                        	callback.onSendNotification(App42ResultHandler.SUCCESS);
+                        }
+                    }); 
+				}
+				catch(Exception e){
+            		callerThreadHandler.post(new Runnable() {
+                        @Override
+                        public void run() {      
+                        	callback.onSendNotification(App42ResultHandler.UNKNOWN_ERROR);
+                        }
+                    });
+				}
+			}
+		}.start();
+	}
+	
+	public void getMyNotifications(final MessageQueueListener callback){
+		final Handler callerThreadHandler = new Handler();
+		new Thread(){
+			@Override
+			public void run(){
+				try{
+					//Queue response = queueService.getMessages("Inbox"+UserContext.MyUserName, 2000);
+					Queue response = queueService.getMessages("Inbox"+UserContext.MyUserName, 1000);
+					ArrayList<Queue.Message> messageList = response.getMessageList();
+					//build incoming message json array for 
+					final ArrayList<JSONObject> jsonMsgList = new ArrayList<JSONObject>();
+					for(int i=0;i<messageList.size();i++){
+						Message msg = messageList.get(i);
+						JSONObject jsonMsgObj = new JSONObject(msg.getPayLoad());
+						jsonMsgObj.put("id", msg.getMessageId());
+						jsonMsgList.add(jsonMsgObj);
+					}
+            		callerThreadHandler.post(new Runnable() {
+                        @Override
+                        public void run() {      
+                        	callback.onGetMessages(jsonMsgList);
+                        }
+                    });
+				}
+				catch(Exception e){
+					System.out.println(e.getMessage());
+            		callerThreadHandler.post(new Runnable() {
+                        @Override
+                        public void run() {      
+                        	callback.onGetMessages(null);
+                        }
+                    });
+				}
+			}
+		}.start();
+	}
 	
 	public void getTopRankingsToday(final String currentGameName, final App42LeaderBoardListener callBack) {
 		final Handler callerThreadHandler = new Handler();
@@ -127,7 +217,7 @@ public class AsyncApp42Service {
             @Override public void run() {
                 try {  
                 	Date today = new Date();
-                	Date yesterday = new Date(today.getTime() - 1000*60*60*10);
+                	Date yesterday = new Date(today.getTime() - 1000*60*60*24);	// milliseconds in 24 hours
                 	final Game game = scoreBoardService.getTopRankings(currentGameName, yesterday, today);
                 	ArrayList<Score> topScoresOfTheDay = game.getScoreList();
                 	final ArrayList<JSONObject> scoreDataList = buildScoreDataList(topScoresOfTheDay);
@@ -209,26 +299,7 @@ public class AsyncApp42Service {
 		final Handler callerThreadHandler = new Handler();
         new Thread(){
             @Override public void run() {
-                try {  
-                	/* TODO: fix once new API is ready
-                	ArrayList<Game> allGames = gameService.getAllGames();
-                	Game lastUserGame = null;
-                	Score lastUserScore = null;
-                	for(int i=0; i<allGames.size(); i++){
-                		String gameName = allGames.get(i).getName();
-                		try{
-                			Game game = scoreBoardService.getLastScoreByUser(gameName, username);
-                			Score lastGameScore = game.getScoreList().get(0);
-                			if(gameName.equals(App42Connect.currentGameName)) { //TODO: fix lastUserScore == null || lastUserScore.createdOn.before(lastGameScore.createdOn)){
-                				lastUserScore = lastGameScore;
-                				lastUserGame = game;
-                			}
-                		}
-                		catch(App42NotFoundException e){
-                			continue;
-                		}
-                	}*/
-                	
+                try {       
                 	Game lastUserGame = scoreBoardService.getLastScoreByUser(App42Connect.currentGameName, username);
                 	Score lastUserScore = lastUserGame.getScoreList().get(0);
                 	
